@@ -9,7 +9,7 @@
     "subtitle": "audio 1.mp3",
     "audioType": "audiodoc",
     "audioSrc": "/audio-docs/audio%201.mp3",
-    "fallbackSrc": "/audio-docs/slide%201%20story%203.mp3",
+    "fallbackSrc": "/audio-docs/audio%201.mp4",
     "audioDocFilename": "audio 1.mp3",
     "icon": "volume-2",
     "color": "#000000"
@@ -24,7 +24,7 @@
     "subtitle": "audio 2.mp3",
     "audioType": "audiodoc",
     "audioSrc": "/audio-docs/audio%202.mp3",
-    "fallbackSrc": "/audio-docs/slide%202%20story%203.mp3",
+    "fallbackSrc": "/audio-docs/audio%202.mp4",
     "audioDocFilename": "audio 2.mp3",
     "icon": "volume-2",
     "color": "#000000"
@@ -39,7 +39,7 @@
     "subtitle": "audio 3.mp3",
     "audioType": "audiodoc",
     "audioSrc": "/audio-docs/audio%203.mp3",
-    "fallbackSrc": "/audio-docs/slide%203%20story%203.mp3",
+    "fallbackSrc": "/audio-docs/audio%203.mp4",
     "audioDocFilename": "audio 3.mp3",
     "icon": "volume-2",
     "color": "#000000"
@@ -54,7 +54,7 @@
     "subtitle": "audio 4.mp3",
     "audioType": "audiodoc",
     "audioSrc": "/audio-docs/audio%204.mp3",
-    "fallbackSrc": "/audio-docs/slide%204%20story%203.mp3",
+    "fallbackSrc": "/audio-docs/audio%204.mpeg",
     "audioDocFilename": "audio 4.mp3",
     "icon": "volume-2",
     "color": "#000000"
@@ -69,7 +69,7 @@
     "subtitle": "audio 5.mp3",
     "audioType": "audiodoc",
     "audioSrc": "/audio-docs/audio%205.mp3",
-    "fallbackSrc": "/audio-docs/audio%205.mp3",
+    "fallbackSrc": "/audio-docs/audio%205.mpeg",
     "audioDocFilename": "audio 5.mp3",
     "icon": "volume-2",
     "color": "#000000"
@@ -84,7 +84,7 @@
     "subtitle": "audio 6.mp3",
     "audioType": "audiodoc",
     "audioSrc": "/audio-docs/audio%206.mp3",
-    "fallbackSrc": "/audio-docs/audio%206.mp3",
+    "fallbackSrc": "/audio-docs/audio%206.mpeg",
     "audioDocFilename": "audio 6.mp3",
     "icon": "volume-2",
     "color": "#000000"
@@ -99,7 +99,7 @@
     "subtitle": "audio 7.mp3",
     "audioType": "audiodoc",
     "audioSrc": "/audio-docs/audio%207.mp3",
-    "fallbackSrc": "/audio-docs/audio%207.mp3",
+    "fallbackSrc": "/audio-docs/audio%207.wav",
     "audioDocFilename": "audio 7.mp3",
     "icon": "volume-2",
     "color": "#000000"
@@ -114,7 +114,7 @@
     "subtitle": "audio 8.mp3",
     "audioType": "audiodoc",
     "audioSrc": "/audio-docs/audio%208.mp3",
-    "fallbackSrc": "/audio-docs/audio%208.mp3",
+    "fallbackSrc": "/audio-docs/audio%208.wav",
     "audioDocFilename": "audio 8.mp3",
     "icon": "volume-2",
     "color": "#000000"
@@ -129,7 +129,7 @@
     "subtitle": "audio 9.mp3",
     "audioType": "audiodoc",
     "audioSrc": "/audio-docs/audio%209.mp3",
-    "fallbackSrc": "/audio-docs/audio%209.mp3",
+    "fallbackSrc": "/audio-docs/audio%209.wav",
     "audioDocFilename": "audio 9.mp3",
     "icon": "volume-2",
     "color": "#000000"
@@ -144,7 +144,7 @@
     "subtitle": "audio 10.mp3",
     "audioType": "audiodoc",
     "audioSrc": "/audio-docs/audio%2010.mp3",
-    "fallbackSrc": "/audio-docs/audio%2010.mp3",
+    "fallbackSrc": "/audio-docs/audio%2010.wav",
     "audioDocFilename": "audio 10.mp3",
     "icon": "volume-2",
     "color": "#000000"
@@ -159,7 +159,7 @@
     "subtitle": "audio 11.mp3",
     "audioType": "audiodoc",
     "audioSrc": "/audio-docs/audio%2011.mp3",
-    "fallbackSrc": "/audio-docs/audio%2011.mp3",
+    "fallbackSrc": "/audio-docs/audio%2011.mp4",
     "audioDocFilename": "audio 11.mp3",
     "icon": "volume-2",
     "color": "#000000"
@@ -174,7 +174,7 @@
     "subtitle": "audio 12.mp3",
     "audioType": "audiodoc",
     "audioSrc": "/audio-docs/audio%2012.mp3",
-    "fallbackSrc": "/audio-docs/audio%2012.mp3",
+    "fallbackSrc": "/audio-docs/audio%2012.mp4",
     "audioDocFilename": "audio 12.mp3",
     "icon": "volume-2",
     "color": "#000000"
@@ -189,7 +189,7 @@
     "subtitle": "audio 13.mp3",
     "audioType": "audiodoc",
     "audioSrc": "/audio-docs/audio%2013.mp3",
-    "fallbackSrc": "/audio-docs/audio%2013.mp3",
+    "fallbackSrc": "/audio-docs/audio%2013.mp4",
     "audioDocFilename": "audio 13.mp3",
     "icon": "volume-2",
     "color": "#000000"
@@ -204,7 +204,7 @@
     "subtitle": "audio 14.mp3",
     "audioType": "audiodoc",
     "audioSrc": "/audio-docs/audio%2014.mp3",
-    "fallbackSrc": "/audio-docs/audio%2014.mp3",
+    "fallbackSrc": "/audio-docs/audio%2014.aac",
     "audioDocFilename": "audio 14.mp3",
     "icon": "volume-2",
     "color": "#000000"
@@ -219,7 +219,7 @@
     "subtitle": "audio 15.mp3",
     "audioType": "audiodoc",
     "audioSrc": "/audio-docs/audio%2015.mp3",
-    "fallbackSrc": "/audio-docs/audio%2015.mp3",
+    "fallbackSrc": "/audio-docs/audio%2015.aac",
     "audioDocFilename": "audio 15.mp3",
     "icon": "volume-2",
     "color": "#000000"
@@ -234,7 +234,7 @@
     "subtitle": "audio 16.mp3",
     "audioType": "audiodoc",
     "audioSrc": "/audio-docs/audio%2016.mp3",
-    "fallbackSrc": "/audio-docs/audio%2016.mp3",
+    "fallbackSrc": "/audio-docs/audio%2016.aac",
     "audioDocFilename": "audio 16.mp3",
     "icon": "volume-2",
     "color": "#000000"
@@ -249,7 +249,7 @@
     "subtitle": "audio 17.mp3",
     "audioType": "audiodoc",
     "audioSrc": "/audio-docs/audio%2017.mp3",
-    "fallbackSrc": "/audio-docs/audio%2017.mp3",
+    "fallbackSrc": "/audio-docs/audio%2017.aac",
     "audioDocFilename": "audio 17.mp3",
     "icon": "volume-2",
     "color": "#000000"
