@@ -36,10 +36,16 @@ class FlipbookApp {
     await this.fetchAudioDocsList();
 
     // 2. Automatically sync audio files to slides (slide 1 -> slide 1, etc.)
-    hotspotManager.syncFromAudioDocs(this.availableAudioDocs);
+    const synced = hotspotManager.syncFromAudioDocs(this.availableAudioDocs);
+
+    // Preload all audio files silently in cache only (zero latency playback on click)
+    audioEngine.preloadHotspotAudios(synced || hotspotManager.getAllHotspots());
 
     // 3. Load sp da.pdf document
     await this.loadSpDaDocument();
+
+    // Ensure all hotspots are fully preloaded in background
+    audioEngine.preloadHotspotAudios(hotspotManager.getAllHotspots());
 
     this.refreshIcons();
   }
@@ -384,6 +390,11 @@ class FlipbookApp {
         pin.style.top = `${hs.y}%`;
         pin.style.color = '#000000';
 
+        const isOdd = hs.isOddSlide || (pageIndex + 1) % 2 !== 0 || hs.x <= 50;
+        if (isOdd) {
+          pin.classList.add('align-left');
+        }
+
         const isCurrentPlaying = audioEngine.isPlaying && audioEngine.currentHotspotId === hs.id;
         if (isCurrentPlaying) {
           pin.classList.add('is-playing');
@@ -624,8 +635,9 @@ class FlipbookApp {
   }
 
   bindHotspotManagerEvents() {
-    hotspotManager.subscribe(() => {
+    hotspotManager.subscribe((hotspots) => {
       this.renderHotspotsOnPages();
+      audioEngine.preloadHotspotAudios(hotspots);
     });
   }
 }

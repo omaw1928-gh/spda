@@ -15,6 +15,8 @@ class AudioEngine {
     this.subscribers = new Set();
     this.mediaRecorder = null;
     this.recordedChunks = [];
+    this.audioCache = new Map();
+    this.preloadPromises = new Map();
   }
 
   getAudioContext() {
@@ -277,7 +279,90 @@ class AudioEngine {
     });
   }
 
-  // Play audio for a hotspot
+  cleanAudioUrl(url) {
+    if (!url || typeof url !== 'string') return '';
+    if (url.startsWith('/audio-docs/')) {
+      const filename = url.replace('/audio-docs/', '');
+      return `/audio-docs/${encodeURIComponent(decodeURIComponent(filename))}`;
+    }
+    return url;
+  }
+
+  // Preload an audio file into browser memory/Cache API with zero playback
+  async preloadAudio(rawUrl) {
+    const url = this.cleanAudioUrl(rawUrl);
+    if (!url) return null;
+
+    if (this.audioCache.has(url)) {
+      return this.audioCache.get(url);
+    }
+    if (this.preloadPromises.has(url)) {
+      return this.preloadPromises.get(url);
+    }
+
+    const promise = (async () => {
+      try {
+        let blob = null;
+
+        // Try CacheStorage first for persistent speed
+        if (typeof window !== 'undefined' && 'caches' in window) {
+          try {
+            const cache = await window.caches.open('spda-audio-cache-v1');
+            const cachedRes = await cache.match(url);
+            if (cachedRes) {
+              blob = await cachedRes.blob();
+            } else {
+              const netRes = await fetch(url, { cache: 'force-cache' });
+              if (netRes.ok) {
+                cache.put(url, netRes.clone()).catch(() => {});
+                blob = await netRes.blob();
+              }
+            }
+          } catch (_) {}
+        }
+
+        if (!blob) {
+          const res = await fetch(url, { cache: 'force-cache' });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          blob = await res.blob();
+        }
+
+        const objectUrl = URL.createObjectURL(blob);
+        const audio = new Audio();
+        audio.preload = 'auto';
+        audio.src = objectUrl;
+        audio.volume = this.volume;
+        audio.load();
+
+        const item = { url, blob, objectUrl, audio };
+        this.audioCache.set(url, item);
+        return item;
+      } catch (err) {
+        console.warn('Preload audio error for', url, err);
+        return null;
+      } finally {
+        this.preloadPromises.delete(url);
+      }
+    })();
+
+    this.preloadPromises.set(url, promise);
+    return promise;
+  }
+
+  // Preload all audio files in the cache only (zero delay on click, completely silent)
+  async preloadHotspotAudios(hotspots) {
+    if (!Array.isArray(hotspots) || hotspots.length === 0) return;
+    const urls = new Set();
+    hotspots.forEach((hs) => {
+      if (hs.audioSrc) urls.add(hs.audioSrc);
+      if (hs.fallbackSrc) urls.add(hs.fallbackSrc);
+    });
+
+    const tasks = Array.from(urls).map((u) => this.preloadAudio(u));
+    await Promise.allSettled(tasks);
+  }
+
+  // Play audio for a hotspot instantly with zero delay from preloaded cache
   async playHotspotAudio(hotspot) {
     if (this.currentHotspotId === hotspot.id && this.isPlaying) {
       this.pause();
@@ -308,13 +393,24 @@ class AudioEngine {
       return;
     }
 
-    if (audioUrl.startsWith('/audio-docs/')) {
-      const filename = audioUrl.replace('/audio-docs/', '');
-      audioUrl = `/audio-docs/${encodeURIComponent(decodeURIComponent(filename))}`;
+    const cleanUrl = this.cleanAudioUrl(audioUrl);
+
+    // Retrieve from preloaded cache or load immediately
+    let cached = this.audioCache.get(cleanUrl);
+    if (!cached) {
+      cached = await this.preloadAudio(cleanUrl);
     }
 
-    const audio = new Audio(audioUrl);
-    audio.volume = this.volume;
+    let audio;
+    if (cached && cached.audio) {
+      audio = cached.audio;
+      audio.currentTime = 0;
+      audio.volume = this.volume;
+    } else {
+      audio = new Audio(cached ? cached.objectUrl : cleanUrl);
+      audio.volume = this.volume;
+    }
+
     this.currentAudio = audio;
     this.currentHotspotId = hotspot.id;
     this.currentHotspot = hotspot;
@@ -335,11 +431,23 @@ class AudioEngine {
       this.notifySubscribers();
     };
 
-    audio.onerror = () => {
+    audio.onerror = async () => {
       if (hotspot.fallbackSrc) {
         console.log('Primary audio load failed, attempting fallbackSrc:', hotspot.fallbackSrc);
-        audio.src = hotspot.fallbackSrc;
-        audio.play().catch((e) => console.warn('Fallback play error:', e));
+        const fbClean = this.cleanAudioUrl(hotspot.fallbackSrc);
+        let fbCached = this.audioCache.get(fbClean);
+        if (!fbCached) {
+          fbCached = await this.preloadAudio(fbClean);
+        }
+        if (fbCached && fbCached.audio) {
+          this.currentAudio = fbCached.audio;
+          this.currentAudio.currentTime = 0;
+          this.currentAudio.volume = this.volume;
+          this.currentAudio.play().catch((e) => console.warn('Fallback play error:', e));
+        } else {
+          audio.src = fbClean;
+          audio.play().catch((e) => console.warn('Fallback play error:', e));
+        }
       } else {
         this.isPlaying = false;
         this.notifySubscribers();

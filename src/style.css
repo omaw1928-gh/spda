@@ -537,6 +537,18 @@ html, body {
   border-color: transparent transparent #000000 transparent;
 }
 
+/* Top-left aligned hotspot tooltip for odd slides */
+.hotspot-pin.align-left .hotspot-tooltip {
+  left: 0;
+  right: auto;
+  align-items: flex-start;
+}
+
+.hotspot-pin.align-left .hotspot-tooltip::after {
+  left: 16px;
+  right: auto;
+}
+
 .hotspot-pin:hover .hotspot-tooltip {
   opacity: 1;
   visibility: visible;

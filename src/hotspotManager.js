@@ -36,9 +36,28 @@ export class HotspotManager {
   }
 
   /**
+   * Helper to normalize hotspot properties and enforce placement rules:
+   * Odd slides (targetSlideNum % 2 !== 0): button on top-left (x: 10, y: 8)
+   * Even slides (targetSlideNum % 2 === 0): button on top-right (x: 90, y: 8)
+   */
+  normalizeHotspot(h) {
+    const targetSlideNum = (h.pageIndex ?? 0) + 1;
+    const isOdd = targetSlideNum % 2 !== 0;
+    return {
+      ...h,
+      x: isOdd ? 10 : 90,
+      y: 8,
+      isOddSlide: isOdd,
+      icon: 'volume-2',
+      color: '#000000',
+    };
+  }
+
+  /**
    * Synchronize audio pins strictly from audio-docs folder:
-   * If an audio's name is "slide 1..." or "audio 1...", it is automatically placed on Slide 1.
-   * If "slide 2...", placed on Slide 2.
+   * Audio 1 corresponds to Slide 2 (even -> top-right x: 90).
+   * Audio 2 corresponds to Slide 3 (odd -> top-left x: 10).
+   * Audio N corresponds to Slide N+1.
    * Slides without audio files have no button.
    */
   syncFromAudioDocs(audioFiles) {
@@ -51,8 +70,13 @@ export class HotspotManager {
     for (const file of audioFiles) {
       const audioNum = extractSlideNumber(file);
       if (audioNum !== null && audioNum > 0) {
-        // If not set yet, or if file starts with 'audio', prefer it
-        if (!audioMap.has(audioNum) || /^audio/i.test(file)) {
+        const current = audioMap.get(audioNum);
+        if (!current) {
+          audioMap.set(audioNum, file);
+        } else if (file.endsWith('.mp3')) {
+          // Prioritize clean universal .mp3
+          audioMap.set(audioNum, file);
+        } else if (!current.endsWith('.mp3') && /^audio/i.test(file)) {
           audioMap.set(audioNum, file);
         }
       }
@@ -64,16 +88,24 @@ export class HotspotManager {
       const targetSlideNum = audioNum + 1;
       const pageIndex = targetSlideNum - 1; // In 0-indexed flipbook, Slide 2 is pageIndex 1
 
-      // Provide fallback wav if mp4, or vice versa
-      const fallbackFilename = filename.startsWith('audio')
-        ? `slide ${audioNum} story 3.wav`
-        : `audio ${audioNum}.mp4`;
+      // Placement rule:
+      // Odd slides -> top-left side of slide (x: 10, y: 8)
+      // Even slides -> top-right side of slide (x: 90, y: 8)
+      const isOdd = targetSlideNum % 2 !== 0;
+      const xPos = isOdd ? 10 : 90;
+      const yPos = 8;
+
+      const baseName = filename.replace(/\.[^/.]+$/, '');
+      const fallbackFilename = filename.endsWith('.mp3')
+        ? (audioNum <= 4 ? `slide ${audioNum} story 3.mp3` : `audio ${audioNum}.wav`)
+        : `${baseName}.mp3`;
 
       newHotspots.push({
         id: `hs_slide_${targetSlideNum}`,
         pageIndex: pageIndex,
-        x: 90, // Top-right corner
-        y: 8,
+        x: xPos,
+        y: yPos,
+        isOddSlide: isOdd,
         title: `Slide ${targetSlideNum} Audio`,
         subtitle: filename,
         audioType: 'audiodoc',
@@ -147,7 +179,7 @@ export class HotspotManager {
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data) && data.length > 0) {
-          this.hotspots = data.map((h) => ({ ...h, icon: 'volume-2', color: '#000000' }));
+          this.hotspots = data.map((h) => this.normalizeHotspot(h));
           this.lastSavedJson = JSON.stringify(this.hotspots);
           this.notifySubscribers();
           return;
@@ -161,7 +193,7 @@ export class HotspotManager {
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data) && data.length > 0) {
-          this.hotspots = data.map((h) => ({ ...h, icon: 'volume-2', color: '#000000' }));
+          this.hotspots = data.map((h) => this.normalizeHotspot(h));
           this.lastSavedJson = JSON.stringify(this.hotspots);
           this.notifySubscribers();
           return;
@@ -175,7 +207,7 @@ export class HotspotManager {
       if (stored !== null) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          this.hotspots = parsed.map((h) => ({ ...h, icon: 'volume-2', color: '#000000' }));
+          this.hotspots = parsed.map((h) => this.normalizeHotspot(h));
           this.lastSavedJson = JSON.stringify(this.hotspots);
           this.notifySubscribers();
           return;

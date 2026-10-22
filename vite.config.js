@@ -41,14 +41,38 @@ const AUDIO_MIME_TYPES = {
   '.alac': 'audio/alac',
 };
 
+function detectAudioMimeType(filePath, ext) {
+  try {
+    const fd = fs.openSync(filePath, 'r');
+    const buf = Buffer.alloc(12);
+    fs.readSync(fd, buf, 0, 12, 0);
+    fs.closeSync(fd);
+
+    if (buf.slice(0, 4).toString('ascii') === 'RIFF') {
+      return 'audio/wav';
+    }
+    if (buf.slice(4, 8).toString('ascii') === 'ftyp') {
+      return 'audio/mp4';
+    }
+    if (buf[0] === 0xff && (buf[1] & 0xf0) === 0xf0) {
+      return 'audio/aac';
+    }
+    if (buf.slice(0, 3).toString('ascii') === 'ID3' || (buf[0] === 0xff && (buf[1] & 0xe0) === 0xe0)) {
+      return 'audio/mpeg';
+    }
+  } catch (_) {}
+  return AUDIO_MIME_TYPES[ext.toLowerCase()] || 'audio/mpeg';
+}
+
 // Stream audio file with HTTP Range support for reliable playback & seeking
 function streamAudioWithRange(req, res, filePath, ext) {
   const stat = fs.statSync(filePath);
   const fileSize = stat.size;
-  const mimeType = AUDIO_MIME_TYPES[ext.toLowerCase()] || 'audio/mpeg';
+  const mimeType = detectAudioMimeType(filePath, ext);
 
   res.setHeader('Accept-Ranges', 'bytes');
   res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
 
   const range = req.headers.range;
   if (range) {
@@ -69,12 +93,14 @@ function streamAudioWithRange(req, res, filePath, ext) {
       'Accept-Ranges': 'bytes',
       'Content-Length': chunkSize,
       'Content-Type': mimeType,
+      'Cache-Control': 'public, max-age=31536000, immutable',
     });
     fileStream.pipe(res);
   } else {
     res.writeHead(200, {
       'Content-Length': fileSize,
       'Content-Type': mimeType,
+      'Cache-Control': 'public, max-age=31536000, immutable',
     });
     fs.createReadStream(filePath).pipe(res);
   }
